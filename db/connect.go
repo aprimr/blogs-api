@@ -17,7 +17,7 @@ func Connect() {
 	databaseURL := os.Getenv("DATABASE_URL")
 
 	// Inti connection
-	Pool, err := pgxpool.New(context.Background(), databaseURL)
+	Pool, err = pgxpool.New(context.Background(), databaseURL)
 	if err != nil {
 		utils.LogFatal("Unable to connecting to database: ", err)
 	}

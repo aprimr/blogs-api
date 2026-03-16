@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/aprimr/blogs-api/db"
+	"github.com/aprimr/blogs-api/handlers"
 	"github.com/aprimr/blogs-api/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
@@ -23,6 +24,11 @@ func main() {
 
 	// Create router
 	r := chi.NewRouter()
+
+	// Routes
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Post("/register", handlers.RegisterUserHandler)
+	})
 
 	// Start server
 	port := ":" + os.Getenv("PORT")
