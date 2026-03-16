@@ -7,7 +7,7 @@ import (
 	"github.com/aprimr/blogs-api/models"
 )
 
-func SendSuccess(w http.ResponseWriter, status int, message string, data any) {
+func SendSuccess(w http.ResponseWriter, message string, data any, status int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(models.SuccessResponse{
@@ -17,7 +17,7 @@ func SendSuccess(w http.ResponseWriter, status int, message string, data any) {
 	})
 }
 
-func SendError(w http.ResponseWriter, status int, message string) {
+func SendError(w http.ResponseWriter, message string, status int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(models.ErrorResponse{
