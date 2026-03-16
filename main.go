@@ -28,6 +28,7 @@ func main() {
 	// Routes
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Post("/register", handlers.RegisterUserHandler)
+		r.Post("/login", handlers.LoginUserHandler)
 	})
 
 	// Start server

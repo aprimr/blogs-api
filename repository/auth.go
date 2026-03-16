@@ -13,7 +13,7 @@ import (
 
 func RegisterUser(ctx context.Context, registerBody models.RegisterBody) error {
 	// Query for register
-	query := "INSERT INTO users (name, email, password, lastLogin) VALUES($1, $2, $3, $4)"
+	query := "INSERT INTO users (name, email, password, last_login) VALUES($1, $2, $3, $4)"
 
 	// Execute register query
 	_, err := db.Pool.Exec(ctx, query, registerBody.Name, registerBody.Email, registerBody.Password, time.Now())
@@ -30,7 +30,7 @@ func RegisterUser(ctx context.Context, registerBody models.RegisterBody) error {
 
 func GetUser(ctx context.Context, loginBody models.LoginBody) (*models.User, error) {
 	// Query for getting user details
-	query := "SELECT (uid, name, email, password, isVerfied, lastLogin, createdAt) FROM users WHERE email=$1"
+	query := "SELECT uid, name, email, password, is_verified, last_login, created_at FROM users WHERE email=$1"
 
 	// User model
 	user := models.User{}

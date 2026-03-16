@@ -8,9 +8,9 @@ type User struct {
 	Name       string    `json:"name"`
 	Email      string    `json:"email"`
 	Password   string    `json:"-"`
-	IsVerified bool      `json:"isVerified"`
-	LastLogin  time.Time `json:"lastLogin"`
-	CreatedAt  time.Time `json:"createdAt"`
+	IsVerified bool      `json:"is_verified"`
+	LastLogin  time.Time `json:"last_login"`
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 // User sends Register Body to the server while registering
