@@ -76,5 +76,74 @@ func RegisterUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.SendSuccess(w, "User registration successful", nil, http.StatusOK)
+	utils.SendSuccess(w, "User registration successful", nil, http.StatusCreated)
+}
+
+// LoginUserHandler handles user login requests.
+//
+// Expected JSON payload from client:
+//
+//	{
+//		"email": "email@example.com",
+//		"password": "YourPassword123!"
+//	}
+func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
+	loginBody := models.LoginBody{}
+
+	// Parse Login Body
+	err := json.NewDecoder(r.Body).Decode(&loginBody)
+	if err != nil {
+		utils.LogError("Invalid JSON in LoginUserHandler", err)
+		utils.SendError(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Validate data
+	if validation.IsEmptyString(loginBody.Email) {
+		utils.SendError(w, "Email is required", http.StatusBadRequest)
+		return
+	}
+	if validation.IsEmptyString(loginBody.Password) {
+		utils.SendError(w, "Password is required", http.StatusBadRequest)
+		return
+	}
+	if !validation.IsValidEmail(loginBody.Email) {
+		utils.SendError(w, "Invalid email", http.StatusBadRequest)
+		return
+	}
+	if !validation.IsValidPassword(loginBody.Password) {
+		utils.SendError(w, "Password must be at least 8 characters and include a letter, number, and special character", http.StatusBadRequest)
+		return
+	}
+
+	// Call GetUser
+	user, err := repository.GetUser(r.Context(), loginBody)
+	if err != nil {
+		if err.Error() == "invalid email" {
+			utils.LogError("Invalid Email in LoginUserHandler", err)
+			utils.SendError(w, "Invalid Email", http.StatusBadRequest)
+			return
+		}
+		utils.LogError("Unexpected in calling GetUser in LoginUserHandler", err)
+		utils.SendError(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	// Compare user password and hashPassword
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginBody.Password))
+	if err != nil {
+		utils.SendError(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	// Create a jwt token
+	jwtToken, err := utils.CreateToken(user.Uid, user.Name, user.Email)
+	if err != nil {
+		utils.LogError("Creating JWT Token in LoginUserHandler", err)
+		utils.SendError(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	// Send Jwt Token to client
+	utils.SendSuccess(w, "User login successful", jwtToken, http.StatusOK)
 }

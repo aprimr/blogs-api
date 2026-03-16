@@ -8,6 +8,7 @@ import (
 
 	"github.com/aprimr/blogs-api/db"
 	"github.com/aprimr/blogs-api/models"
+	"github.com/jackc/pgx/v5"
 )
 
 func RegisterUser(ctx context.Context, registerBody models.RegisterBody) error {
@@ -25,4 +26,24 @@ func RegisterUser(ctx context.Context, registerBody models.RegisterBody) error {
 	}
 
 	return nil
+}
+
+func GetUser(ctx context.Context, loginBody models.LoginBody) (*models.User, error) {
+	// Query for getting user details
+	query := "SELECT (uid, name, email, password, isVerfied, lastLogin, createdAt) FROM users WHERE email=$1"
+
+	// User model
+	user := models.User{}
+
+	// Execute Query
+	row := db.Pool.QueryRow(ctx, query, loginBody.Email)
+	err := row.Scan(&user.Uid, &user.Name, &user.Email, &user.Password, &user.IsVerified, &user.LastLogin, &user.CreatedAt)
+	if err == pgx.ErrNoRows {
+		return nil, fmt.Errorf("invalid email")
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

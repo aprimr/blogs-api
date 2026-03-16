@@ -10,16 +10,18 @@ import (
 
 type Claims struct {
 	Uid   string `json:"uid"`
+	Name  string `json:"name"`
 	Email string `json:"email"`
 	jwt.RegisteredClaims
 }
 
 var secretKey = []byte(os.Getenv("JWT_SECRET"))
 
-func CreateToken(userId string, email string) (string, error) {
+func CreateToken(userId string, name string, email string) (string, error) {
 	// create claim
 	claims := Claims{
 		Uid:   userId,
+		Name:  name,
 		Email: email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 1)),
@@ -35,7 +37,7 @@ func CreateToken(userId string, email string) (string, error) {
 
 func VerifyToken(tokenString string) (*Claims, error) {
 
-	// 1. parse token and extract claims
+	// parse token and extract claims
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(t *jwt.Token) (interface{}, error) {
 		return secretKey, nil
 	})
@@ -44,12 +46,12 @@ func VerifyToken(tokenString string) (*Claims, error) {
 		return nil, err
 	}
 
-	// 2. extract claims from token
+	// extract claims from token
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
 		return nil, fmt.Errorf("invalid token")
 	}
 
-	// 3. return claims
+	// return claims
 	return claims, nil
 }
