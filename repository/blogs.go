@@ -2,10 +2,12 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/aprimr/blogs-api/db"
 	"github.com/aprimr/blogs-api/models"
+	"github.com/jackc/pgx/v5"
 )
 
 func CreateBlog(ctx context.Context, uid string, blogBody models.BlogBody) (*models.Blog, error) {
@@ -60,9 +62,12 @@ func GetBlogByBlogid(ctx context.Context, blogid string) (*models.Blog, error) {
 func DeleteBlog(ctx context.Context, uid string, blogid string) error {
 	query := "UPDATE blogs SET is_deleted=true WHERE uid=$1 AND blogid=$2"
 
-	_, err := db.Pool.Exec(ctx, query, uid, blogid)
+	commandTag, err := db.Pool.Exec(ctx, query, uid, blogid)
 	if err != nil {
 		return err
+	}
+	if commandTag.RowsAffected() == 0 {
+		return fmt.Errorf("blog doesnt exists")
 	}
 
 	return nil
@@ -86,6 +91,9 @@ func UpdateBlog(ctx context.Context, uid string, blogid string, blogBody models.
 		&blog.CreatedAt,
 	)
 
+	if pgx.ErrNoRows == err {
+		return nil, fmt.Errorf("blog doesnt exists")
+	}
 	if err != nil {
 		return nil, err
 	}

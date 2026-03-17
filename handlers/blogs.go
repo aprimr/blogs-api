@@ -9,6 +9,7 @@ import (
 	"github.com/aprimr/blogs-api/repository"
 	"github.com/aprimr/blogs-api/utils"
 	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgx/v5"
 )
 
 // Expected JSON payload from client:
@@ -78,7 +79,7 @@ func GetBlogByBlogidHandler(w http.ResponseWriter, r *http.Request) {
 	blog, err := repository.GetBlogByBlogid(r.Context(), blogid)
 	if err != nil {
 		utils.LogError("GetBlogById", err)
-		if err.Error() == "no rows in result set" {
+		if err == pgx.ErrNoRows {
 			utils.SendError(w, "No result found", http.StatusNotFound)
 			return
 		}
@@ -111,6 +112,10 @@ func DeleteBlogHandler(w http.ResponseWriter, r *http.Request) {
 	err := repository.DeleteBlog(r.Context(), uid, blogid)
 	if err != nil {
 		utils.LogError("DeleteBlog", err)
+		if err.Error() == "blog doesnt exists" {
+			utils.SendError(w, "Blog not found", http.StatusNotFound)
+			return
+		}
 		utils.SendError(w, "Failed to delete blog", http.StatusInternalServerError)
 		return
 	}
@@ -126,7 +131,7 @@ func DeleteBlogHandler(w http.ResponseWriter, r *http.Request) {
 //		"content": "Content body",
 //		"is_private": false
 //	}
-func UpdateBlogHanlder(w http.ResponseWriter, r *http.Request) {
+func UpdateBlogHandler(w http.ResponseWriter, r *http.Request) {
 	//
 	// Extract blog id from URL params
 	// .../blog/:blogid
@@ -150,7 +155,7 @@ func UpdateBlogHanlder(w http.ResponseWriter, r *http.Request) {
 	// Parse JSON
 	err := json.NewDecoder(r.Body).Decode(&blogBody)
 	if err != nil {
-		utils.LogError("Invalid JSON in CreateBlogHandler", err)
+		utils.LogError("Invalid JSON in UpdateBlogHandler", err)
 		utils.SendError(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
@@ -173,6 +178,10 @@ func UpdateBlogHanlder(w http.ResponseWriter, r *http.Request) {
 	blog, err := repository.UpdateBlog(r.Context(), uid, blogid, blogBody)
 	if err != nil {
 		utils.LogError("Updating Blog", err)
+		if pgx.ErrNoRows == err {
+			utils.SendError(w, "Blog not found", http.StatusNotFound)
+			return
+		}
 		utils.SendError(w, "Error updating blog", http.StatusInternalServerError)
 		return
 	}

@@ -30,17 +30,21 @@ func main() {
 	r.Route("/api/v1", func(r chi.Router) {
 
 		// Public routes
+		// -> auth routes
 		r.Post("/register", handlers.RegisterUserHandler)
 		r.Post("/login", handlers.LoginUserHandler)
+
+		// -> blog routes
+		r.Get("/blog/{blogid}", handlers.GetBlogByBlogidHandler)
 
 		// Private routes (authentication required)
 		r.Group(func(r chi.Router) {
 			r.Use(middlewares.Authentication)
 
-			r.Get("/blog/{blogid}", handlers.GetBlogByBlogidHandler)
+			// -> blog routes
 			r.Post("/blog", handlers.CreateBlogHandler)
 			r.Delete("/blog/{blogid}", handlers.DeleteBlogHandler)
-			r.Put("/blog/{blogid}", handlers.UpdateBlogHanlder)
+			r.Put("/blog/{blogid}", handlers.UpdateBlogHandler)
 		})
 	})
 

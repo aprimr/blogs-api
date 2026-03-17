@@ -28,5 +28,5 @@ func Connect() {
 		utils.LogFatal("Unable to ping database: ", err)
 	}
 
-	utils.LogInfo("Connected to databse")
+	utils.LogInfo("Connected to database")
 }

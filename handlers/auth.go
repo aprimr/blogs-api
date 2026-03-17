@@ -132,7 +132,7 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 	// Compare user password and hashPassword
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginBody.Password))
 	if err != nil {
-		utils.SendError(w, "Something went wrong", http.StatusInternalServerError)
+		utils.SendError(w, "Incorrect password", http.StatusUnauthorized)
 		return
 	}
 
