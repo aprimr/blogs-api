@@ -32,3 +32,14 @@ func CreateBlog(ctx context.Context, uid string, blogBody models.BlogBody) (*mod
 
 	return &blog, nil
 }
+
+func DeleteBlog(ctx context.Context, uid string, blogid string) error {
+	query := "UPDATE blogs SET is_deleted=true WHERE uid=$1 AND blogid=$2"
+
+	_, err := db.Pool.Exec(ctx, query, uid, blogid)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

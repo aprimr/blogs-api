@@ -8,6 +8,7 @@ import (
 	"github.com/aprimr/blogs-api/models"
 	"github.com/aprimr/blogs-api/repository"
 	"github.com/aprimr/blogs-api/utils"
+	"github.com/go-chi/chi/v5"
 )
 
 // Expected JSON payload from client:
@@ -60,4 +61,33 @@ func CreateBlogHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SendSuccess(w, "Blog created successfully", blog, http.StatusCreated)
+}
+
+func DeleteBlogHandler(w http.ResponseWriter, r *http.Request) {
+	//
+	// Extract blog id from URL params
+	// .../blog/:blogid
+	//
+	blogid := chi.URLParam(r, "blogid")
+	if strings.TrimSpace(blogid) == "" {
+		utils.SendError(w, "Invalid blogid", http.StatusBadRequest)
+		return
+	}
+
+	// Get uid from context
+	uid, ok := r.Context().Value("uid").(string)
+	if !ok || uid == "" {
+		utils.SendError(w, "User unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Call delete
+	err := repository.DeleteBlog(r.Context(), uid, blogid)
+	if err != nil {
+		utils.LogError("DeleteBlog", err)
+		utils.SendError(w, "Failed to delete blog", http.StatusInternalServerError)
+		return
+	}
+
+	utils.SendSuccess(w, "Blog deleted successfully", nil, http.StatusOK)
 }

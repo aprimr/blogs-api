@@ -38,6 +38,7 @@ func main() {
 			r.Use(middlewares.Authentication)
 
 			r.Post("/blog", handlers.CreateBlogHandler)
+			r.Delete("/blog/{blogid}", handlers.DeleteBlogHandler)
 		})
 	})
 
