@@ -28,9 +28,32 @@ func CreateBlog(ctx context.Context, uid string, blogBody models.BlogBody) (*mod
 	)
 
 	if err != nil {
-		return &models.Blog{}, err
+		return nil, err
 	}
 
+	return &blog, nil
+}
+
+func GetBlogByBlogid(ctx context.Context, blogid string) (*models.Blog, error) {
+	query := "SELECT blogid, uid, title, description, content, is_deleted, is_private, updated_at, created_at FROM blogs WHERE blogid=$1 AND is_private=false AND is_deleted=false"
+
+	// Fire query and scan row
+	blog := models.Blog{}
+	row := db.Pool.QueryRow(ctx, query, blogid)
+	err := row.Scan(
+		&blog.BlogId,
+		&blog.Uid,
+		&blog.Title,
+		&blog.Description,
+		&blog.Content,
+		&blog.IsDeleted,
+		&blog.IsPrivate,
+		&blog.UpdatedAt,
+		&blog.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
 	return &blog, nil
 }
 
@@ -45,7 +68,7 @@ func DeleteBlog(ctx context.Context, uid string, blogid string) error {
 	return nil
 }
 
-func UpdateBlog(ctx context.Context, uid string, blogid string, blogBody models.BlogBody) (models.Blog, error) {
+func UpdateBlog(ctx context.Context, uid string, blogid string, blogBody models.BlogBody) (*models.Blog, error) {
 	query := "UPDATE blogs SET title=$1, description=$2, content=$3, is_private=$4, updated_at=$5 WHERE uid=$6 AND blogid=$7 RETURNING blogid, uid, title, description, content, is_deleted, is_private, updated_at, created_at"
 
 	// execute query and scan returned row
@@ -64,8 +87,8 @@ func UpdateBlog(ctx context.Context, uid string, blogid string, blogBody models.
 	)
 
 	if err != nil {
-		return models.Blog{}, err
+		return nil, err
 	}
 
-	return blog, nil
+	return &blog, nil
 }

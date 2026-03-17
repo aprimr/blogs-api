@@ -37,6 +37,7 @@ func main() {
 		r.Group(func(r chi.Router) {
 			r.Use(middlewares.Authentication)
 
+			r.Get("/blog/{blogid}", handlers.GetBlogByBlogidHandler)
 			r.Post("/blog", handlers.CreateBlogHandler)
 			r.Delete("/blog/{blogid}", handlers.DeleteBlogHandler)
 			r.Put("/blog/{blogid}", handlers.UpdateBlogHanlder)

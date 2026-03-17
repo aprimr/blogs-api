@@ -63,6 +63,32 @@ func CreateBlogHandler(w http.ResponseWriter, r *http.Request) {
 	utils.SendSuccess(w, "Blog created successfully", blog, http.StatusCreated)
 }
 
+func GetBlogByBlogidHandler(w http.ResponseWriter, r *http.Request) {
+	//
+	// Extract blog id from URL params
+	// .../blog/:blogid
+	//
+	blogid := chi.URLParam(r, "blogid")
+	if strings.TrimSpace(blogid) == "" {
+		utils.SendError(w, "Invalid blogid", http.StatusBadRequest)
+		return
+	}
+
+	// Call GetBlogByBlogid
+	blog, err := repository.GetBlogByBlogid(r.Context(), blogid)
+	if err != nil {
+		utils.LogError("GetBlogById", err)
+		if err.Error() == "no rows in result set" {
+			utils.SendError(w, "No result found", http.StatusNotFound)
+			return
+		}
+		utils.SendError(w, "Error fetching blog", http.StatusInternalServerError)
+		return
+	}
+
+	utils.SendSuccess(w, "Blog fetched successfully", blog, http.StatusOK)
+}
+
 func DeleteBlogHandler(w http.ResponseWriter, r *http.Request) {
 	//
 	// Extract blog id from URL params
