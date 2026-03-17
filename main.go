@@ -6,6 +6,7 @@ import (
 
 	"github.com/aprimr/blogs-api/db"
 	"github.com/aprimr/blogs-api/handlers"
+	"github.com/aprimr/blogs-api/middlewares"
 	"github.com/aprimr/blogs-api/utils"
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
@@ -27,8 +28,17 @@ func main() {
 
 	// Routes
 	r.Route("/api/v1", func(r chi.Router) {
+
+		// Public routes
 		r.Post("/register", handlers.RegisterUserHandler)
 		r.Post("/login", handlers.LoginUserHandler)
+
+		// Private routes (authentication required)
+		r.Group(func(r chi.Router) {
+			r.Use(middlewares.Authentication)
+
+			r.Post("/blog", handlers.CreateBlogHandler)
+		})
 	})
 
 	// Start server
