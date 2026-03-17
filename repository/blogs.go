@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/aprimr/blogs-api/db"
 	"github.com/aprimr/blogs-api/models"
@@ -42,4 +43,29 @@ func DeleteBlog(ctx context.Context, uid string, blogid string) error {
 	}
 
 	return nil
+}
+
+func UpdateBlog(ctx context.Context, uid string, blogid string, blogBody models.BlogBody) (models.Blog, error) {
+	query := "UPDATE blogs SET title=$1, description=$2, content=$3, is_private=$4, updated_at=$5 WHERE uid=$6 AND blogid=$7 RETURNING blogid, uid, title, description, content, is_deleted, is_private, updated_at, created_at"
+
+	// execute query and scan returned row
+	blog := models.Blog{}
+	row := db.Pool.QueryRow(ctx, query, blogBody.Title, blogBody.Description, blogBody.Content, blogBody.IsPrivate, time.Now(), uid, blogid)
+	err := row.Scan(
+		&blog.BlogId,
+		&blog.Uid,
+		&blog.Title,
+		&blog.Description,
+		&blog.Content,
+		&blog.IsDeleted,
+		&blog.IsPrivate,
+		&blog.UpdatedAt,
+		&blog.CreatedAt,
+	)
+
+	if err != nil {
+		return models.Blog{}, err
+	}
+
+	return blog, nil
 }

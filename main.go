@@ -39,6 +39,7 @@ func main() {
 
 			r.Post("/blog", handlers.CreateBlogHandler)
 			r.Delete("/blog/{blogid}", handlers.DeleteBlogHandler)
+			r.Put("/blog/{blogid}", handlers.UpdateBlogHanlder)
 		})
 	})
 
