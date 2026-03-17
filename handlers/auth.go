@@ -144,6 +144,14 @@ func LoginUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Update user lastLogin
+	err = repository.UpdateUserLastLogin(r.Context(), user.Uid)
+	if err != nil {
+		utils.LogError("Updating user last login", err)
+		utils.SendError(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
 	// Send Jwt Token to client
 	utils.SendSuccess(w, "User login successful", jwtToken, http.StatusOK)
 }

@@ -47,3 +47,16 @@ func GetUser(ctx context.Context, loginBody models.LoginBody) (*models.User, err
 
 	return &user, nil
 }
+
+func UpdateUserLastLogin(ctx context.Context, uid string) error {
+	// Update last_logined query
+	query := "UPDATE users SET last_login=$1 WHERE uid=$2"
+
+	// fire query
+	_, err := db.Pool.Exec(ctx, query, time.Now(), uid)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
