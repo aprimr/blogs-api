@@ -9,6 +9,7 @@ import (
 	"github.com/aprimr/blogs-api/middlewares"
 	"github.com/aprimr/blogs-api/utils"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
 )
 
@@ -25,6 +26,14 @@ func main() {
 
 	// Create router
 	r := chi.NewRouter()
+
+	// Add CORS policy
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"Authorization", "Content-Type"},
+		AllowCredentials: false,
+	}))
 
 	// Routes
 	r.Route("/api/v1", func(r chi.Router) {

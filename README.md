@@ -6,15 +6,15 @@ A RESTful blog API built with **Go**, **Chi Router**, **JWT Authentication**, an
 
 ## 🚀 Tech Stack
 
-| Tool | Purpose |
-|------|---------|
-| Go | Primary language |
-| Chi v5 | HTTP router |
-| PostgreSQL (Neon) | Database |
-| pgx/v5 | PostgreSQL driver |
-| golang-jwt/jwt v5 | JWT authentication |
-| bcrypt | Password hashing |
-| godotenv | Environment variables |
+| Tool              | Purpose               |
+| ----------------- | --------------------- |
+| Chi v5            | HTTP router           |
+| PostgreSQL (Neon) | Database              |
+| pgx/v5            | PostgreSQL driver     |
+| golang-jwt/jwt v5 | JWT authentication    |
+| bcrypt            | Password hashing      |
+| godotenv          | Environment variables |
+| go-chi/cors       | CORS middleware       |
 
 ---
 
@@ -52,17 +52,20 @@ blogs-api/
 ## ⚙️ Setup & Installation
 
 **1. Clone the repository**
+
 ```bash
 git clone https://github.com/aprimr/blogs-api.git
 cd blogs-api
 ```
 
 **2. Install dependencies**
+
 ```bash
 go mod tidy
 ```
 
 **3. Create `.env` file**
+
 ```env
 ENVIRONMENT=development
 PORT=8080
@@ -99,6 +102,7 @@ CREATE TABLE blogs (
 ```
 
 **5. Run the server**
+
 ```bash
 go run main.go
 ```
@@ -110,6 +114,7 @@ go run main.go
 This API uses **JWT Bearer Token** authentication.
 
 After logging in include the token in the `Authorization` header on every protected request:
+
 ```
 Authorization: Bearer <your_jwt_token>
 ```
@@ -122,28 +127,28 @@ Tokens expire after **24 hours**.
 
 ### Auth — Public
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/register` | Register a new user |
-| POST | `/api/v1/login` | Login and receive JWT token |
+| Method | Endpoint           | Description                 |
+| ------ | ------------------ | --------------------------- |
+| POST   | `/api/v1/register` | Register a new user         |
+| POST   | `/api/v1/login`    | Login and receive JWT token |
 
 ---
 
 ### Blogs — Public
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/blogs` | Get all public blogs (paginated) |
-| GET | `/api/v1/blog/{blogid}` | Get a single public blog by ID |
+| Method | Endpoint                | Description                      |
+| ------ | ----------------------- | -------------------------------- |
+| GET    | `/api/v1/blogs`         | Get all public blogs (paginated) |
+| GET    | `/api/v1/blog/{blogid}` | Get a single public blog by ID   |
 
 ---
 
 ### Blogs — Protected 🔒
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/blog` | Create a new blog post |
-| PUT | `/api/v1/blog/{blogid}` | Update your blog post |
+| Method | Endpoint                | Description                |
+| ------ | ----------------------- | -------------------------- |
+| POST   | `/api/v1/blog`          | Create a new blog post     |
+| PUT    | `/api/v1/blog/{blogid}` | Update your blog post      |
 | DELETE | `/api/v1/blog/{blogid}` | Soft delete your blog post |
 
 ---
@@ -153,6 +158,7 @@ Tokens expire after **24 hours**.
 ### POST `/api/v1/register`
 
 **Request:**
+
 ```json
 {
   "name": "John Doe",
@@ -162,6 +168,7 @@ Tokens expire after **24 hours**.
 ```
 
 **Response `201`:**
+
 ```json
 {
   "success": true,
@@ -174,6 +181,7 @@ Tokens expire after **24 hours**.
 ### POST `/api/v1/login`
 
 **Request:**
+
 ```json
 {
   "email": "john@example.com",
@@ -182,6 +190,7 @@ Tokens expire after **24 hours**.
 ```
 
 **Response `200`:**
+
 ```json
 {
   "success": true,
@@ -195,6 +204,7 @@ Tokens expire after **24 hours**.
 ### GET `/api/v1/blogs?page=1&limit=10`
 
 **Response `200`:**
+
 ```json
 {
   "success": true,
@@ -216,6 +226,7 @@ Tokens expire after **24 hours**.
 ### POST `/api/v1/blog` 🔒
 
 **Request:**
+
 ```json
 {
   "title": "My First Blog Post",
@@ -226,6 +237,7 @@ Tokens expire after **24 hours**.
 ```
 
 **Response `201`:**
+
 ```json
 {
   "success": true,
@@ -249,28 +261,30 @@ Tokens expire after **24 hours**.
 ## ✅ Validation Rules
 
 ### Password
+
 - Minimum 8 characters
 - At least one letter
 - At least one number
 - At least one special character
 
 ### Blog Post
-| Field | Rule |
-|-------|------|
-| Title | Minimum 12 characters |
+
+| Field       | Rule                  |
+| ----------- | --------------------- |
+| Title       | Minimum 12 characters |
 | Description | Minimum 30 characters |
-| Content | Minimum 60 characters |
+| Content     | Minimum 60 characters |
 
 ---
 
 ## 🌍 Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `ENVIRONMENT` | App environment | `development` or `production` |
-| `PORT` | Server port | `8080` |
-| `DATABASE_URL` | Neon PostgreSQL connection string | `postgresql://...` |
-| `JWT_SECRET` | Secret key for signing JWT tokens | `your-secret-key` |
+| Variable       | Description                       | Example                       |
+| -------------- | --------------------------------- | ----------------------------- |
+| `ENVIRONMENT`  | App environment                   | `development` or `production` |
+| `PORT`         | Server port                       | `8080`                        |
+| `DATABASE_URL` | Neon PostgreSQL connection string | `postgresql://...`            |
+| `JWT_SECRET`   | Secret key for signing JWT tokens | `your-secret-key`             |
 
 ---
 
@@ -278,9 +292,8 @@ Tokens expire after **24 hours**.
 
 - Passwords hashed with **bcrypt**
 - JWT tokens signed with **HS256**
+- CORS enabled — allows requests from any origin (`*`)
 - Soft delete — blogs are never permanently deleted
 - Users can only update/delete their **own** blogs
 - Sensitive data never exposed in responses (`json:"-"`)
 - Environment-based error logging — internal errors hidden in production
-
----
