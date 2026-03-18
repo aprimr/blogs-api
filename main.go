@@ -36,6 +36,7 @@ func main() {
 
 		// -> blog routes
 		r.Get("/blog/{blogid}", handlers.GetBlogByBlogidHandler)
+		r.Get("/blogs", handlers.GetBlogsHandler)
 
 		// Private routes (authentication required)
 		r.Group(func(r chi.Router) {

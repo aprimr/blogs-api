@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/aprimr/blogs-api/db"
@@ -34,6 +35,57 @@ func CreateBlog(ctx context.Context, uid string, blogBody models.BlogBody) (*mod
 	}
 
 	return &blog, nil
+}
+
+func GetBlogs(ctx context.Context, page int, limit int) (*models.PaginatedBlogs, error) {
+	// Calculate offset
+	offset := (page - 1) * limit
+
+	// Calculate total no of rows
+	var totalRows int
+	row := db.Pool.QueryRow(ctx, "SELECT COUNT(*) FROM blogs WHERE is_deleted=false AND is_private=false")
+	err := row.Scan(&totalRows)
+	if err != nil {
+		return nil, err
+	}
+
+	query := "SELECT blogid, uid, title, description, content, is_deleted, is_private, updated_at, created_at FROM blogs WHERE is_deleted=false AND is_private=false ORDER BY created_at DESC LIMIT $1 OFFSET $2 "
+	rows, err := db.Pool.Query(ctx, query, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// scan rows into blog and append to blogs
+	blogs := []models.Blog{}
+	for rows.Next() {
+		blog := models.Blog{}
+
+		err := rows.Scan(&blog.BlogId, &blog.Uid, &blog.Title, &blog.Description, &blog.Content, &blog.IsDeleted, &blog.IsPrivate, &blog.UpdatedAt, &blog.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		blogs = append(blogs, blog)
+	}
+
+	if rows.Err() != nil {
+		return nil, rows.Err()
+	}
+
+	// Calculate total pages
+	totalPages := int(math.Ceil(float64(totalRows) / float64(limit)))
+
+	// Create paginated blog
+	response := models.PaginatedBlogs{
+		Data:       blogs,
+		Page:       page,
+		Limit:      limit,
+		TotalCount: totalRows,
+		TotalPages: totalPages,
+	}
+
+	return &response, nil
 }
 
 func GetBlogByBlogid(ctx context.Context, blogid string) (*models.Blog, error) {

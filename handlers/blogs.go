@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/aprimr/blogs-api/models"
@@ -62,6 +63,34 @@ func CreateBlogHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SendSuccess(w, "Blog created successfully", blog, http.StatusCreated)
+}
+
+// GET METHOD ../blogs?page=1&limit=10
+func GetBlogsHandler(w http.ResponseWriter, r *http.Request) {
+	// Extract query params
+	page := r.URL.Query().Get("page")
+	limit := r.URL.Query().Get("limit")
+
+	// validate params
+	pageInt, err := strconv.Atoi(page)
+	if err != nil || pageInt < 1 {
+		pageInt = 1 // default page
+	}
+
+	limitInt, err := strconv.Atoi(limit)
+	if err != nil || limitInt < 1 {
+		limitInt = 10 // default limit
+	}
+
+	// Call GetBlogs
+	blogs, err := repository.GetBlogs(r.Context(), pageInt, limitInt)
+	if err != nil {
+		utils.LogError("GetBlogs", err)
+		utils.SendError(w, "Error fetching blog", http.StatusInternalServerError)
+		return
+	}
+
+	utils.SendSuccess(w, "Blogs fetch successful", blogs, http.StatusOK)
 }
 
 func GetBlogByBlogidHandler(w http.ResponseWriter, r *http.Request) {
